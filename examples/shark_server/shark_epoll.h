@@ -1,3 +1,6 @@
+#ifndef shark_epoll_h
+#define shark_epoll_h
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -98,7 +101,7 @@ static int shark_epoll_add(struct _shark *sk, int fd)
 	struct epoll_event event;
 
 	event.data.fd = fd;
-	event.events = EPOLLIN | EPOLLET;
+	event.events = EPOLLIN; // default LT
 	epoll_ctl(epoll->efd, EPOLL_CTL_ADD, fd, &event);
 	
 	return 0;
@@ -112,7 +115,7 @@ static int shark_epoll_create(struct _shark *sk)
 
 	epoll->efd = epoll_create1(0);
 	event.data.fd = sk->sfd;
-	event.events = EPOLLIN | EPOLLET;
+	event.events = EPOLLIN; // default LT
 	s = epoll_ctl(epoll->efd, EPOLL_CTL_ADD, sk->sfd, &event);
 	if (s == -1) {
       perror ("epoll_ctl");
@@ -230,26 +233,4 @@ static int shark_socket_close(struct _shark *sk)
 	return 0;
 }
 
-int main(int argc, char **argv)
-{
-	if(argc != 2) {
-		fprintf(stderr, "Usage: %s port\n", argv[0]);
-		exit(0);
-	}
-
-	struct _shark sk;
-	memset(&sk, 0x00, sizeof(struct _shark));
-
-	snprintf(sk.port, 20, "%s", argv[1]);
-
-	sk.sfd = shark_socket_create(sk.port);	
-	shark_epoll_create(&sk);
-	while(1) {
-		if(shark_epoll_deal(&sk) != 0) {
-			break;
-		}
-	}
-	shark_socket_close(&sk);
-
-	return 0;
-}
+#endif
