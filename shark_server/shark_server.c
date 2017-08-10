@@ -13,10 +13,10 @@ int main(int argc, char **argv)
 
 	snprintf(sk.port, 20, "%s", argv[1]);
 
-	sk.sfd = shark_socket_create(sk.port);	
-	shark_epoll_create(&sk);
+	sk.sfd = shark_socket_create(&sk);	
+	
 	while(1) {
-		if(shark_epoll_deal(&sk) != 0) {
+		if(shark_socket_deal(&sk) != 0) {
 			break;
 		}
 	}
