@@ -13,7 +13,9 @@ int main(int argc, char **argv)
 
 	snprintf(sk.port, 20, "%s", argv[1]);
 
-	sk.sfd = shark_socket_create(&sk);	
+	if(shark_socket_create(&sk) != 0) {
+		return -1;
+	}
 	
 	while(1) {
 		if(shark_socket_deal(&sk) != 0) {

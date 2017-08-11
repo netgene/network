@@ -141,6 +141,8 @@ static int shark_socket_accept(struct _shark *sk)
 		}
 	}
 
+	printf("accept fd:%d", infd);
+
 	shark_socket_non_blocking(infd);
 	shark_epoll_add(sk, infd);
 
@@ -171,6 +173,8 @@ static int shark_recv_data(struct _shark *sk, struct epoll_event *event)
 			done = 1;
 			break;
 		}
+
+		printf("read fd[%d]:%s\n", event->data.fd, buf);
 		
 		/* Write the buffer to standard output */
 		s = write (event->data.fd, buf, count);
@@ -196,6 +200,8 @@ static int shark_epoll_deal(struct _shark *sk)
 	struct epoll_event *events = epoll->events;
 	int sfd = sk->sfd;
 	int n, i, infd;
+
+	printf("epoll wait efd:%d\n", epoll->efd);
 
 	n = epoll_wait(epoll->efd, epoll->events, MAXEVENTS, -1);
 	for(i = 0; i < n; i++) {

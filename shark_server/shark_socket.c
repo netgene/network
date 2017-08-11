@@ -38,19 +38,20 @@ int shark_socket_create(struct _shark *sk)
     }
 
   for (rp = result; rp != NULL; rp = rp->ai_next) {
-      sfd = socket (rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-      if (sfd == -1)
-        continue;
+    sfd = socket (rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+    if (sfd == -1)
+      continue;
 
-      s = bind (sfd, rp->ai_addr, rp->ai_addrlen);
-      if (s == 0) {
-          /* We managed to bind successfully! */
-          break;
-        }
-
-        printf("close fd:%d\n", sfd);
-		close(sfd);
+    s = bind (sfd, rp->ai_addr, rp->ai_addrlen);
+    if (s == 0) {
+      /* We managed to bind successfully! */
+      break;
     }
+
+    printf("close fd:%d\n", sfd);
+    close(sfd);
+  }
+  sk->sfd = sfd;
 
     if (rp == NULL) {
       fprintf (stderr, "Could not bind\n");
@@ -60,17 +61,19 @@ int shark_socket_create(struct _shark *sk)
 
 	s = shark_socket_non_blocking(sfd);
 	if(s == -1)
-		abort ();
+    return -1;
 
 	s = listen (sfd, SOMAXCONN);
 	if (s == -1) {
-      perror ("listen");
-      abort ();
-    }
+    perror ("listen");
+    return -1;
+  }
+
+  printf("socket create sfd:%d\n", sfd);
 
   shark_epoll_create(sk);
 
-	return sfd;	
+	return 0;	
 }
 
 int shark_socket_accept(struct _shark *sk)
@@ -90,6 +93,8 @@ int shark_socket_accept(struct _shark *sk)
     }
   }
 
+  printf("accept fd:%d\n", infd);
+
   shark_socket_non_blocking(infd);
 
   shark_epoll_add(sk, infd);
@@ -103,6 +108,8 @@ int shark_epoll_deal(struct _shark *sk)
   struct epoll_event *events = epoll->events;
   int sfd = sk->sfd;
   int n, i, infd;
+
+  printf("epoll wait efd:%d\n", epoll->efd);
 
   n = epoll_wait(epoll->efd, epoll->events, MAXEVENTS, -1);
   for(i = 0; i < n; i++) {
@@ -146,6 +153,8 @@ int shark_recv_data(struct _shark *sk, struct epoll_event *event)
       done = 1;
       break;
     }
+
+    printf("read:%s\n", buf);
     
     /* Write the buffer to standard output */
     s = write (event->data.fd, buf, count);

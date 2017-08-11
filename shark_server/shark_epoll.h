@@ -34,6 +34,8 @@ static int shark_epoll_add(struct _shark *sk, int fd)
 	event.events = EPOLLIN; // default LT
 	epoll_ctl(epoll->efd, EPOLL_CTL_ADD, fd, &event);
 	
+	printf("epoll add fd[%d]\n", fd);
+
 	return 0;
 }
 
@@ -51,6 +53,8 @@ static int shark_epoll_create(struct _shark *sk)
       perror ("epoll_ctl");
       abort ();
     }
+
+    printf("epoll add sfd[%d]\n", sk->sfd);
 
 	epoll->events = calloc(MAXEVENTS, sizeof(struct epoll_event));
 	
